@@ -30,7 +30,8 @@ const read = async (req, res) => {
 
 const update = async (req, res) => {
   try {
-    const song = await Song.findByIdAndUpdate(req.params.id, req.body, {
+    // let updateID = req.params.id;
+    const song = await Song.findByIdAndUpdate(req.params.songId, req.body, {
       new: true,
     });
     res.json(song);
@@ -41,8 +42,8 @@ const update = async (req, res) => {
 
 const remove = async (req, res) => {
   try {
-    await Song.findByIdAndDelete(req.params.id);
-    res.sendStatus(204);
+    await Song.findByIdAndDelete(req.params.songId);
+    res.status(204).json({ msg: "Song is successfully deleted" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
