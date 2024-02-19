@@ -49,11 +49,50 @@ const remove = async (req, res) => {
   }
 };
 
+const statistics = async (req, res) => {
+  console.log("request arrived statistics");
+  try {
+    const totalSongs = await Song.countDocuments();
+    const totalArtists = await Song.distinct("artist").countDocuments();
+    const totalAlbums = await Song.distinct("album").countDocuments();
+    const totalGenres = await Song.distinct("genre").countDocuments();
+
+    const genresCount = await Song.aggregate([
+      { $group: { _id: "$genre", count: { $sum: 1 } } },
+    ]);
+
+    const artistsInfo = await Song.aggregate([
+      {
+        $group: {
+          _id: "$artist",
+          songCount: { $sum: 1 },
+          albumCount: { $addToSet: "$album" },
+        },
+      },
+    ]);
+
+    const albumsInfo = await Song.aggregate([
+      { $group: { _id: "$album", songCount: { $sum: 1 } } },
+    ]);
+
+    res.json({
+      totalSongs,
+      totalArtists,
+      totalAlbums,
+      totalGenres,
+      genresCount,
+      artistsInfo,
+      albumsInfo,
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
 const songByID = async (req, res, next, id) => {
   console.log("id before tryin songbyid", id);
   try {
     let song = await Song.findById(id);
-    console.log("song is found in songbyId", song);
     if (!song)
       return res.status(400).json({
         error: "Song not found",
@@ -67,4 +106,4 @@ const songByID = async (req, res, next, id) => {
   }
 };
 
-module.exports = { create, list, read, update, remove, songByID };
+module.exports = { create, list, read, update, remove, statistics, songByID };

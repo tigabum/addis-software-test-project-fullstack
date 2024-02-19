@@ -10,6 +10,11 @@ router.route("/api/songs/:songId").get(songCtrl.read);
 
 router.route("/api/songs").post(songCtrl.create);
 router.route("/api/songs/:songId").put(songCtrl.update).delete(songCtrl.remove);
+
 router.param("songId", songCtrl.songByID);
+
+// statistics
+
+router.route("/statistics").get(songCtrl.statistics);
 
 module.exports = router;
